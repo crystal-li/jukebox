@@ -5,7 +5,14 @@
 
     <!-- Menu Actions -->
     <string name="action_connect">Connect</string>
-    <string name="title_activity_connection">ConnectionActivity</string>
+    <string name="title_activity_connection">Connect</string>
     <string name="action_settings">Settings</string>
+
+    <!-- Button Labels -->
+    <string name="button_refresh">Refresh</string>
+
+    <!-- Connection Activity -->
+    <string name="available_hosts">Available Hosts:</string>
+    <string name="set_as_host">Set as host</string>
 
 </resources>
