@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         int id = item.getItemId();
 
+        //TODO: get rid of this?
         if (id == R.id.action_connect) {
             Intent intent = new Intent(this, ConnectionActivity.class);
             startActivity(intent);
