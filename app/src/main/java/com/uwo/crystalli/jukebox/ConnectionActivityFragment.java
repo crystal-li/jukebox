@@ -36,9 +36,6 @@ public class ConnectionActivityFragment extends Fragment {
         Log.v(LOG_TAG, "Executing reqTask");
         reqTask.execute();
 
-        //TODO: not sure if this is right, but so we can access views in OnPostExecute()
-        View rootView = inflater.inflate(R.layout.fragment_connection, container, false);
-
         return inflater.inflate(R.layout.fragment_connection, container, false);
     }
 
@@ -59,7 +56,7 @@ public class ConnectionActivityFragment extends Fragment {
 
             try {
 
-                URL url = new URL("http://10.0.2.2:3000");
+                URL url = new URL("http://192.168.0.111:3000");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
