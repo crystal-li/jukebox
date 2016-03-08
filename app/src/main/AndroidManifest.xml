@@ -25,7 +25,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.uwo.crystalli.jukebox.MainActivity" />
         </activity>
-        <activity android:name=".PlayerActivity"></activity>
+        <activity android:name=".PlayerActivity" />
+        <activity android:name=".AddMediaActivity" />
+        <activity android:name=".QueueActivity"></activity>
     </application>
 
 </manifest>

@@ -8,4 +8,7 @@
     <string name="title_activity_connection">ConnectionActivity</string>
     <string name="action_settings">Settings</string>
 
+    <!-- Add Media Actions -->
+    <string name="search_media_query_hint">22 - Taylor Swift</string>
+
 </resources>
