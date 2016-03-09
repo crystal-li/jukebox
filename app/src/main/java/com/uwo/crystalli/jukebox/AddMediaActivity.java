@@ -20,12 +20,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.List;
 
 // Youtube API Key: AIzaSyDJpskdkcvZ_6coBGE0hzznNr4sjbQGNno
 
@@ -70,8 +77,8 @@ public class AddMediaActivity extends AppCompatActivity {
         searchResultsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String videoId = ((VideoResult) searchResultsListView.getItemAtPosition(i)).getId();
-                addMediaToJukebox(videoId);
+                VideoResult video = ((VideoResult) searchResultsListView.getItemAtPosition(i));
+                addMediaToJukebox(video);
             }
         });
     }
@@ -81,9 +88,180 @@ public class AddMediaActivity extends AppCompatActivity {
         searchYoutubeTask.execute(query);
     }
 
-    private void addMediaToJukebox(String videoId) {
+    private void addMediaToJukebox(VideoResult video) {
         //TODO: add media request to Jukebox API
+        addMediaToJukeboxTask addMediaTask = new addMediaToJukeboxTask();
+        addMediaTask.execute(video);
+    }
 
+    //TODO: This is stupid. Should seriously abstract these tasks out to something else.
+    public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Void> {
+
+        private final String LOG_TAG = addMediaToJukeboxTask.class.getSimpleName();
+
+        private ArrayList<VideoResult> getDataFromJson(String resultJsonString)
+                throws JSONException {
+
+            //TODO: change all the json param names to variables like below
+            // These are the names of the JSON objects that need to be extracted.
+            // final String _ITEMS = "items";
+            // final String _SNIPPET = "snippet";
+
+            JSONObject resultJson = new JSONObject(resultJsonString);
+            JSONArray videoJsonArray = resultJson.getJSONArray("items");
+
+            ArrayList<VideoResult> videoResultsList = new ArrayList<VideoResult>();
+
+            for(int i = 0; i < videoJsonArray.length(); i++) {
+
+                // Extract the fields we need from the JSON object and
+                // construct a videoResult object
+                JSONObject videoObject = videoJsonArray.getJSONObject(i);
+                String videoTitle = videoObject.getJSONObject("snippet").getString("title");
+                String videoId = videoObject.getJSONObject("id").getString("videoId");
+                String thumbUrl = videoObject.getJSONObject("snippet")
+                        .getJSONObject("thumbnails")
+                        .getJSONObject("default")
+                        .getString("url");
+
+                videoResultsList.add(new VideoResult(videoId, videoTitle, thumbUrl));
+            }
+
+            return videoResultsList;
+        }
+
+        @Override
+        protected Void doInBackground(VideoResult... v) {
+
+            VideoResult video = v[0]; //TODO: This is stupid.
+
+            // These two need to be declared outside the try/catch
+            // so that they can be closed in the finally block.
+
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            //HTTP request parameters
+            String title = video.title;
+            String videoId = video.getId();
+            String type = "youtube";
+            String extra = video.thumbUrl;
+
+            try {
+                // Construct the URL for the Youtube query
+                //TODO: change this and put API on remote server
+                final String JUKEBOX_BASE_URL = "http://192.168.0.111:3000/media/";
+                final String TITLE_PARAM = "title";
+                final String TYPE_PARAM = "type";
+                final String VIDEO_ID_PARAM = "videoId";
+                final String EXTRA_PARAM = "extra";
+
+                URL url = new URL(JUKEBOX_BASE_URL);
+
+                // Create the request to OpenWeatherMap, and open the connection
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+
+                // Add POST parameters
+                List<AbstractMap.SimpleEntry> params = new ArrayList<AbstractMap.SimpleEntry>();
+                params.add(new AbstractMap.SimpleEntry(TITLE_PARAM, title));
+                params.add(new AbstractMap.SimpleEntry(TYPE_PARAM, type));
+                params.add(new AbstractMap.SimpleEntry(VIDEO_ID_PARAM, videoId));
+                params.add(new AbstractMap.SimpleEntry(EXTRA_PARAM, extra));
+
+                urlConnection.connect();
+
+                OutputStream outputStream = urlConnection.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(outputStream, "UTF-8"));
+                writer.write(getQuery(params));
+                writer.flush();
+                writer.close();
+                outputStream.close();
+
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    return null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return null;
+                }
+                String result = buffer.toString();
+                Log.v(LOG_TAG, result);
+                int responseCode = urlConnection.getResponseCode();
+                Log.v(LOG_TAG, Integer.toString(responseCode));
+
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error ", e);
+                // If the code didn't successfully get the data, there's no point in attemping
+                // to parse it.
+                return null;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+            /*
+            try {
+                return getDataFromJson(videoResultsString);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+            */
+
+            return null;
+        }
+
+        private String getQuery(List<AbstractMap.SimpleEntry> params) throws UnsupportedEncodingException
+        {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+
+            for (AbstractMap.SimpleEntry pair : params)
+            {
+                if (first)
+                    first = false;
+                else
+                    result.append("&");
+
+                result.append(URLEncoder.encode(pair.getKey().toString(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(pair.getValue().toString(), "UTF-8"));
+            }
+
+            return result.toString();
+        }
+
+        /*
+        protected void onPostExecute(ArrayList<VideoResult> videos) {
+            mSearchResultsAdapter.clear();
+            mSearchResultsAdapter.addAll(videos);
+        }
+        */
     }
 
     public class SearchYoutubeTask extends AsyncTask<String, Void, ArrayList<VideoResult>> {

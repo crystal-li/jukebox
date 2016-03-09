@@ -2,9 +2,9 @@ package com.uwo.crystalli.jukebox;
 
 public class VideoResult {
 
-    private String id;
-    private String title;
-    private String thumbUrl; //All seem to be 120 x 90 for the default
+    public String id;
+    public String title;
+    public String thumbUrl; //All seem to be 120 x 90 for the default
 
     //TODO: don't know what this is
     public VideoResult() {
