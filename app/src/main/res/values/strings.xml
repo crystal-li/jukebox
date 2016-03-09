@@ -8,8 +8,15 @@
     <string name="title_activity_connection">ConnectionActivity</string>
     <string name="action_settings">Settings</string>
 
+<!-- Names of buttons and text inputs -->
+
     <string name="Enter_Your_Name">Enter Your Name</string>
     <string name="Enter_Host_ID">Enter a Host ID</string>
     <string name="button_Host">Connect as Host</string>
     <string name="button_Guest">Connect as Guest</string>
+
+    <!-- Add Media Actions -->
+    <string name="search_media_query_hint">22 - Taylor Swift</string>
+
+>>>>>>> master
 </resources>

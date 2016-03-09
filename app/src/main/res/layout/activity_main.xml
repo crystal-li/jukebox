@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -27,18 +26,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/Enter_Your_Name"
-        android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/button4"
+        android:layout_alignEnd="@+id/button4" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_Host"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="29dp"
         android:id="@+id/button4"
-        android:onClick="sendMessage" />
+        android:onClick="sendMessage"
+        android:layout_marginTop="62dp"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true" />
 
 
 
@@ -46,18 +45,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/Enter_Host_ID"
-        android:layout_alignBottom="@+id/button3"
-        android:layout_alignStart="@+id/Enter_Your_Name" />
+        android:layout_below="@+id/button3"
+        android:layout_centerHorizontal="true" />
 
      <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_Guest"
          android:id="@+id/button3"
-         android:layout_below="@+id/button4"
-         android:layout_alignStart="@+id/button4"
-         android:layout_marginTop="36dp"
-         android:onClick="sendMessage" />
+         android:onClick="sendMessage"
+         android:layout_marginTop="48dp"
+         android:layout_below="@+id/Enter_Your_Name"
+         android:layout_alignStart="@+id/button4" />
 
 
 
