@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -95,7 +96,7 @@ public class AddMediaActivity extends AppCompatActivity {
     }
 
     //TODO: This is stupid. Should seriously abstract these tasks out to something else.
-    public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Void> {
+    public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Integer> {
 
         private final String LOG_TAG = addMediaToJukeboxTask.class.getSimpleName();
 
@@ -131,7 +132,7 @@ public class AddMediaActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(VideoResult... v) {
+        protected Integer doInBackground(VideoResult... v) {
 
             VideoResult video = v[0]; //TODO: This is stupid.
 
@@ -181,31 +182,7 @@ public class AddMediaActivity extends AppCompatActivity {
                 writer.close();
                 outputStream.close();
 
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                String result = buffer.toString();
-                Log.v(LOG_TAG, result);
-                int responseCode = urlConnection.getResponseCode();
-                Log.v(LOG_TAG, Integer.toString(responseCode));
+                return urlConnection.getResponseCode();
 
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
@@ -224,16 +201,6 @@ public class AddMediaActivity extends AppCompatActivity {
                     }
                 }
             }
-            /*
-            try {
-                return getDataFromJson(videoResultsString);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-            */
-
-            return null;
         }
 
         private String getQuery(List<AbstractMap.SimpleEntry> params) throws UnsupportedEncodingException
@@ -256,12 +223,19 @@ public class AddMediaActivity extends AppCompatActivity {
             return result.toString();
         }
 
-        /*
-        protected void onPostExecute(ArrayList<VideoResult> videos) {
-            mSearchResultsAdapter.clear();
-            mSearchResultsAdapter.addAll(videos);
+        protected void onPostExecute(Integer responseCode) {
+                String toastMessage;
+
+                if (responseCode == 200) {
+                    toastMessage = "Successfully added to queue :)";
+                } else {
+                    toastMessage = "Can't add to queue ):";
+                }
+
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        toastMessage, Toast.LENGTH_SHORT);
+                toast.show();
         }
-        */
     }
 
     public class SearchYoutubeTask extends AsyncTask<String, Void, ArrayList<VideoResult>> {
