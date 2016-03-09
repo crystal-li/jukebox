@@ -90,12 +90,13 @@ public class AddMediaActivity extends AppCompatActivity {
     }
 
     private void addMediaToJukebox(VideoResult video) {
-        //TODO: add media request to Jukebox API
         addMediaToJukeboxTask addMediaTask = new addMediaToJukeboxTask();
         addMediaTask.execute(video);
     }
 
-    //TODO: This is stupid. Should seriously abstract these tasks out to something else.
+    //TODO: Is there a better way to abstract out HTTP requests? Put it in a class?
+    //This sends a POST request to the Jukebox API to add media from Youtube
+    // and returns the response code.
     public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Integer> {
 
         private final String LOG_TAG = addMediaToJukeboxTask.class.getSimpleName();
@@ -135,9 +136,6 @@ public class AddMediaActivity extends AppCompatActivity {
         protected Integer doInBackground(VideoResult... v) {
 
             VideoResult video = v[0]; //TODO: This is stupid.
-
-            // These two need to be declared outside the try/catch
-            // so that they can be closed in the finally block.
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -293,7 +291,7 @@ public class AddMediaActivity extends AppCompatActivity {
             int maxResults = 10;
             String typeString = "video";
             //TODO: put in API Key properly
-            String apiKey = "AIzaSyDJpskdkcvZ_6coBGE0hzznNr4sjbQGNno";
+            String apiKey = ((GlobalApplicationState) getApplication()).getYoutubeApiKey();
             String partString = "id, snippet";
             String queryString = params[0];
 
