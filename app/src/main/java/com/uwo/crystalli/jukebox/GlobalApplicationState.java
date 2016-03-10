@@ -8,6 +8,7 @@ import android.app.Application;
 public class GlobalApplicationState extends Application {
 
     private Boolean isHost = null;
+    private String YOUTUBE_API_KEY = "AIzaSyDJpskdkcvZ_6coBGE0hzznNr4sjbQGNno";
 
     public Boolean isHost() {
         return isHost;
@@ -16,4 +17,10 @@ public class GlobalApplicationState extends Application {
     public void setHost(Boolean isHost) {
         this.isHost = isHost;
     }
+
+    public String getYoutubeApiKey() {
+        return this.YOUTUBE_API_KEY;
+    }
+
+
 }
