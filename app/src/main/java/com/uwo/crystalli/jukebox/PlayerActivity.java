@@ -1,14 +1,11 @@
 package com.uwo.crystalli.jukebox;
 
 import android.content.Intent;
-import android.media.Image;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -16,7 +13,6 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,23 +22,24 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Queue;
 
 public class PlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private final String LOG_TAG = PlayerActivity.class.getSimpleName();
     YouTubePlayer mYoutubePlayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+
         if (savedInstanceState == null) {
             // TODO: change media fragment dynamically depending on the type of media
             YouTubePlayerSupportFragment youtubePlayerFragment = new YouTubePlayerSupportFragment();
             //TODO: figure out a better way to store API keys
             String apiKey = ((GlobalApplicationState) this.getApplication()).getYoutubeApiKey();
             youtubePlayerFragment.initialize(apiKey, new YouTubePlayer.OnInitializedListener() {
-                //TODO: Figure out what to actually do if it fails...
                 @Override
                 public void onInitializationSuccess(YouTubePlayer.Provider provider,
                                                     YouTubePlayer youTubePlayer, boolean b) {
@@ -50,11 +47,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                     //      and find some way to peek every xx seconds if
                     //      the queue is empty
                     mYoutubePlayer = youTubePlayer;
-                    youTubePlayer.cueVideo("AgFeZr5ptV8");
-                    String toastMessage = "Successfully initialized Youtube player";
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            toastMessage, Toast.LENGTH_SHORT);
-                    toast.show();
+                    Log.v(LOG_TAG, "Successfuly initialized Youtube player");
+
                     GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
                     getNextMediaTask.execute();
                     setPlayerEventListeners();
@@ -63,6 +57,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 @Override
                 public void onInitializationFailure(YouTubePlayer.Provider provider,
                                                     YouTubeInitializationResult youTubeInitializationResult) {
+                    //TODO: Figure out what to actually do if it fails...
                     String toastMessage = "): Failed to initialize Youtube player.";
                     Toast toast = Toast.makeText(getApplicationContext(),
                             toastMessage, Toast.LENGTH_SHORT);
@@ -81,7 +76,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
         //TODO: enable play/skip based on settings or host/guest state
         ImageButton playBtn = (ImageButton) findViewById(R.id.play_btn);
-        playBtn.setEnabled(false);
+        playBtn.setOnClickListener(this);
         //playBtn.setOnClickListener(this);
 
         ImageButton skipBtn = (ImageButton) findViewById(R.id.skip_btn);
@@ -132,6 +127,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             });
 
         mYoutubePlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
+
             @Override
             public void onLoading() {
 
@@ -140,6 +136,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public void onLoaded(String s) {
                 mYoutubePlayer.play();
+                PopMediaTask popMediaTask = new PopMediaTask();
+                popMediaTask.execute();
             }
 
             @Override
@@ -149,15 +147,13 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
             @Override
             public void onVideoStarted() {
-
+                //TODO: Maybe I should pop when the video starts!
             }
 
             @Override
             public void onVideoEnded() {
-                String toastMessage = "video has ended!";
-                Toast toast = Toast.makeText(getApplicationContext(),
-                        toastMessage, Toast.LENGTH_SHORT);
-                toast.show();
+                Log.v(LOG_TAG, "video ended");
+
                 GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
                 getNextMediaTask.execute();
             }
@@ -181,7 +177,19 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 break;
 
             case R.id.play_btn:
-                //TODO: implement
+                //TODO: make a service that constantly checks if the queue is no longer empty?
+                // Need some way so that player can start playing a video when the queue was
+                // empty on startup
+                /*
+                if (!mYoutubePlayer.isPlaying()) {
+                    GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
+                    getNextMediaTask.execute();
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "The video is already playing!",
+                            Toast.LENGTH_SHORT);
+                }
+                */
                 break;
 
             case R.id.skip_btn:
@@ -223,6 +231,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         protected VideoResult doInBackground(Void... params) {
+
+            Log.v(LOG_TAG, "GetNextMediaTask started");
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -283,7 +293,9 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             }
 
             try {
-                return getDataFromJson(videoResultString);
+                if (videoResultString == null) return null;
+                else return getDataFromJson(videoResultString);
+
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
@@ -293,9 +305,102 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         }
 
         protected void onPostExecute(VideoResult video) {
-            mYoutubePlayer.cueVideo(video.getId());
-            mYoutubePlayer.play();
+            Log.v(LOG_TAG, "GetNextMediaTask finished");
+
+            if (video != null) {
+                mYoutubePlayer.cueVideo(video.getId());
+                Log.v(LOG_TAG, "play()");
+                mYoutubePlayer.play();
+            } else {
+                String toastMessage = "There's nothing in the queue!";
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        toastMessage, Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }
     }
+
+     public class PopMediaTask extends AsyncTask<Void, Void, Void> {
+
+         private final String LOG_TAG = PopMediaTask.class.getSimpleName();
+
+         @Override
+         protected Void doInBackground(Void... params) {
+         Log.v(LOG_TAG, "PopMediaTask started");
+
+             HttpURLConnection urlConnection = null;
+             BufferedReader reader = null;
+
+             // Will contain the raw JSON response as a string.
+             String resultString = null;
+
+             try {
+                 // Construct the URL for the Youtube query
+                 final String pop_media_req = "http://192.168.0.111:3000/media/pop";
+
+                 URL url = new URL(pop_media_req);
+
+                 // Create the request to OpenWeatherMap, and open the connection
+                 urlConnection = (HttpURLConnection) url.openConnection();
+                 urlConnection.setRequestMethod("GET");
+                 urlConnection.connect();
+
+                 // Read the input stream into a String
+                 InputStream inputStream = urlConnection.getInputStream();
+                 StringBuffer buffer = new StringBuffer();
+                 if (inputStream == null) {
+                     // Nothing to do.
+                     return null;
+                 }
+                 reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                 String line;
+                 while ((line = reader.readLine()) != null) {
+                     // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                     // But it does make debugging a *lot* easier if you print out the completed
+                     // buffer for debugging.
+                     buffer.append(line + "\n");
+                 }
+
+                 if (buffer.length() == 0) {
+                     // Stream was empty.  No point in parsing.
+                     return null;
+                 }
+                 resultString = buffer.toString();
+                 Log.v(LOG_TAG, resultString);
+
+             } catch (IOException e) {
+                 Log.e(LOG_TAG, "Error ", e);
+                 // If the code didn't successfully get the data, there's no point in attempting
+                 // to parse it.
+                 return null;
+             } finally {
+                 if (urlConnection != null) {
+                     urlConnection.disconnect();
+                 }
+                 if (reader != null) {
+                     try {
+                         reader.close();
+                     } catch (final IOException e) {
+                         Log.e(LOG_TAG, "Error closing stream", e);
+                     }
+                 }
+             }
+             return null;
+         }
+
+         protected void onPostExecute(Void v) {
+             Log.v(LOG_TAG, "PopMediaTask finished");
+             /*
+             String toastMessage = "Finished PopMediaTask!";
+             Toast toast = Toast.makeText(getApplicationContext(),
+                     toastMessage, Toast.LENGTH_SHORT);
+             toast.show();
+
+             GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
+             getNextMediaTask.execute();
+             */
+         }
+     }
 
 }
