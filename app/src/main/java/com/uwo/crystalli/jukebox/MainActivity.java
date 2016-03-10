@@ -25,7 +25,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    public final static String EXTRA_MESSAGE = "com.uwo.crystalli.jukebox.MESSAGE";
+   /* public final static String EXTRA_MESSAGE = "com.uwo.crystalli.jukebox.MESSAGE";
 
     public void sendMessage(View view) {
 
@@ -35,21 +35,23 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_MESSAGE, message);
         startActivity(intent);
 
-    }
+    } */ //Send input message to next screen
 
-    @Override
+     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         //TODO: This should go in the connection activity later */
         //TODO: Maybe PlayerActivity and ConnectionActivity should be fragments (?)
-        ((GlobalApplicationState) this.getApplication()).setHost(true);
 
         Boolean isHost = ((GlobalApplicationState) this.getApplication()).isHost();
 
+         ((GlobalApplicationState) this.getApplication()).setHost(null);
+
+
         if (isHost == null) {
-            Intent intent = new Intent(this, ConnectionActivity.class);
+            Intent intent = new Intent(this, ConnectHere.class);
             startActivity(intent);
         }
         else if (isHost) {
@@ -61,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

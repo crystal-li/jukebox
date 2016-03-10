@@ -9,4 +9,55 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.uwo.crystalli.jukebox.ConnectHere"
     android:id="@+id/content">
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Connect to Jukebox!"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="46dp" />
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/host_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/host_btn"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/guest_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/guest_btn"
+        android:layout_marginBottom="46dp"
+        android:layout_above="@id/host_btn"
+        android:layout_centerHorizontal="true" />
+
+    <EditText android:id="@+id/Enter_Host_ID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/Enter_Host_ID"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:layout_above="@id/host_btn"/>
+
+    <EditText android:id="@+id/Enter_Your_Name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/Enter_Your_Name"
+        android:layout_below="@id/host_btn"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

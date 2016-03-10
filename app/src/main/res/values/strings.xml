@@ -2,6 +2,7 @@
 
     <!-- General -->
     <string name="app_name">Jukebox</string>
+    <string name="Connect_to_Jukebox">Connect to Jukebox!</string>
 
     <!-- Menu Actions -->
     <string name="action_connect">Connect</string>
@@ -12,8 +13,8 @@
 
     <string name="Enter_Your_Name">Enter Your Name</string>
     <string name="Enter_Host_ID">Enter a Host ID</string>
-    <string name="button_Host">Connect as Host</string>
-    <string name="button_Guest">Connect as Guest</string>
+    <string name="host_btn">Connect as Host</string>
+    <string name="guest_btn">Connect as Guest</string>
 
     <!-- Add Media Actions -->
     <string name="search_media_query_hint">22 - Taylor Swift</string>
