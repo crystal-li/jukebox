@@ -242,7 +242,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
             try {
                 // Construct the URL for the Youtube query
-                final String get_next_req_string = "http://192.168.0.111:3000/media/next";
+                final String get_next_req_string = "http://192.168.0.111:8080/media/next";
 
                 URL url = new URL(get_next_req_string);
 
@@ -309,8 +309,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
             if (video != null) {
                 mYoutubePlayer.cueVideo(video.getId());
-                Log.v(LOG_TAG, "play()");
-                mYoutubePlayer.play();
+                //Log.v(LOG_TAG, "play()");
+                //mYoutubePlayer.play();
             } else {
                 String toastMessage = "There's nothing in the queue!";
                 Toast toast = Toast.makeText(getApplicationContext(),
@@ -336,7 +336,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
              try {
                  // Construct the URL for the Youtube query
-                 final String pop_media_req = "http://192.168.0.111:3000/media/pop";
+                 final String pop_media_req = "http://192.168.0.111:8080/media/pop";
 
                  URL url = new URL(pop_media_req);
 

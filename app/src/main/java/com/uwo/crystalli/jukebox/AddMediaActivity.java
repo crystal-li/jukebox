@@ -149,7 +149,7 @@ public class AddMediaActivity extends AppCompatActivity {
             try {
                 // Construct the URL for the Youtube query
                 //TODO: change this and put API on remote server
-                final String JUKEBOX_BASE_URL = "http://192.168.0.111:3000/media/";
+                final String JUKEBOX_BASE_URL = "http://192.168.0.111:8080/media/";
                 final String TITLE_PARAM = "title";
                 final String TYPE_PARAM = "type";
                 final String VIDEO_ID_PARAM = "videoId";
