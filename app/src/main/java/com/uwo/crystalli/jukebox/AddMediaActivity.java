@@ -373,7 +373,9 @@ public class AddMediaActivity extends AppCompatActivity {
 
         protected void onPostExecute(ArrayList<VideoResult> videos) {
             mSearchResultsAdapter.clear();
-            mSearchResultsAdapter.addAll(videos);
+            if (videos != null)
+                Log.v(LOG_TAG, videos.toString());
+                mSearchResultsAdapter.addAll(videos);
         }
     }
 
