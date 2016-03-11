@@ -241,8 +241,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             String videoResultString = null;
 
             try {
-                // Construct the URL for the Youtube query
-                final String get_next_req_string = "http://192.168.0.111:8080/media/next";
+                //TODO: Save this somewhere else.
+                final String get_next_req_string = "http://jukebox1234.herokuapp.com/media/next";
 
                 URL url = new URL(get_next_req_string);
 
@@ -336,7 +336,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
              try {
                  // Construct the URL for the Youtube query
-                 final String pop_media_req = "http://192.168.0.111:8080/media/pop";
+                 final String pop_media_req = "http://jukebox1234.herokuapp.com/media/pop";
 
                  URL url = new URL(pop_media_req);
 
