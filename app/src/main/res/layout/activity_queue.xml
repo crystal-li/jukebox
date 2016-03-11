@@ -9,10 +9,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.uwo.crystalli.jukebox.QueueActivity">
 
-    <TextView
+    <ListView
+        android:id="@+id/queue_listview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Queue!"/>
+        android:layout_height="wrap_content" />
 
 
 </RelativeLayout>
