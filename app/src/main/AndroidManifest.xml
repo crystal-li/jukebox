@@ -17,15 +17,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ConnectionActivity"
-            android:label="@string/title_activity_connection"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.uwo.crystalli.jukebox.MainActivity" />
-        </activity>
 
         <!-- Connection Screen -->
         <activity android:name=".ConnectHere"></activity>

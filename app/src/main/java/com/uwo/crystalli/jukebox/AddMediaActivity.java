@@ -95,24 +95,24 @@ public class AddMediaActivity extends AppCompatActivity {
     }
 
     //TODO: Is there a better way to abstract out HTTP requests? Put it in a class?
-    //This sends a POST request to the Jukebox API to add media from Youtube
-    // and returns the response code.
-    public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Integer> {
+            //This sends a POST request to the Jukebox API to add media from Youtube
+            // and returns the response code.
+            public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Integer> {
 
-        private final String LOG_TAG = addMediaToJukeboxTask.class.getSimpleName();
+                private final String LOG_TAG = addMediaToJukeboxTask.class.getSimpleName();
 
-        private ArrayList<VideoResult> getDataFromJson(String resultJsonString)
-                throws JSONException {
+                private ArrayList<VideoResult> getDataFromJson(String resultJsonString)
+                        throws JSONException {
 
-            //TODO: change all the json param names to variables like below
-            // These are the names of the JSON objects that need to be extracted.
-            // final String _ITEMS = "items";
-            // final String _SNIPPET = "snippet";
+                    //TODO: change all the json param names to variables like below
+                    // These are the names of the JSON objects that need to be extracted.
+                    // final String _ITEMS = "items";
+                    // final String _SNIPPET = "snippet";
 
-            JSONObject resultJson = new JSONObject(resultJsonString);
-            JSONArray videoJsonArray = resultJson.getJSONArray("items");
+                    JSONObject resultJson = new JSONObject(resultJsonString);
+                    JSONArray videoJsonArray = resultJson.getJSONArray("items");
 
-            ArrayList<VideoResult> videoResultsList = new ArrayList<VideoResult>();
+                    ArrayList<VideoResult> videoResultsList = new ArrayList<VideoResult>();
 
             for(int i = 0; i < videoJsonArray.length(); i++) {
 

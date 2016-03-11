@@ -47,9 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
         Boolean isHost = ((GlobalApplicationState) this.getApplication()).isHost();
 
-         ((GlobalApplicationState) this.getApplication()).setHost(null);
-
-
         if (isHost == null) {
             Intent intent = new Intent(this, ConnectHere.class);
             startActivity(intent);
@@ -70,20 +67,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int id = item.getItemId();
-
-        //TODO: get rid of this?
-        if (id == R.id.action_connect) {
-            Intent intent = new Intent(this,ConnectionActivity.class);
-            startActivity(intent);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     /*Context context = getApplicationContext();
     CharSequence text = "Hello toast!";
