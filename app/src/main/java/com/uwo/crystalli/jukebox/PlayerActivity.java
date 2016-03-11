@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -220,7 +221,9 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 try {
                     VideoResult video = new GetNextMediaTask()
                             .executeOnExecutor(AsyncTask.SERIAL_EXECUTOR).get();
-                    Log.v(LOG_TAG, video.toString());
+                    TextView nowPlayingTxtView = (TextView) findViewById(R.id.now_playing_textview);
+                    nowPlayingTxtView.setText(video.title);
+
                     new DownloadImageTask()
                             .executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, video.thumbUrl);
 
