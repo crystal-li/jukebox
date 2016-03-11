@@ -1,11 +1,7 @@
 package com.uwo.crystalli.jukebox;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -97,40 +93,9 @@ public class AddMediaActivity extends AppCompatActivity {
     //TODO: Is there a better way to abstract out HTTP requests? Put it in a class?
             //This sends a POST request to the Jukebox API to add media from Youtube
             // and returns the response code.
-            public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Integer> {
+    public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Integer> {
 
-                private final String LOG_TAG = addMediaToJukeboxTask.class.getSimpleName();
-
-                private ArrayList<VideoResult> getDataFromJson(String resultJsonString)
-                        throws JSONException {
-
-                    //TODO: change all the json param names to variables like below
-                    // These are the names of the JSON objects that need to be extracted.
-                    // final String _ITEMS = "items";
-                    // final String _SNIPPET = "snippet";
-
-                    JSONObject resultJson = new JSONObject(resultJsonString);
-                    JSONArray videoJsonArray = resultJson.getJSONArray("items");
-
-                    ArrayList<VideoResult> videoResultsList = new ArrayList<VideoResult>();
-
-            for(int i = 0; i < videoJsonArray.length(); i++) {
-
-                // Extract the fields we need from the JSON object and
-                // construct a videoResult object
-                JSONObject videoObject = videoJsonArray.getJSONObject(i);
-                String videoTitle = videoObject.getJSONObject("snippet").getString("title");
-                String videoId = videoObject.getJSONObject("id").getString("videoId");
-                String thumbUrl = videoObject.getJSONObject("snippet")
-                        .getJSONObject("thumbnails")
-                        .getJSONObject("default")
-                        .getString("url");
-
-                videoResultsList.add(new VideoResult(videoId, videoTitle, thumbUrl));
-            }
-
-            return videoResultsList;
-        }
+        private final String LOG_TAG = addMediaToJukeboxTask.class.getSimpleName();
 
         @Override
         protected Integer doInBackground(VideoResult... v) {
@@ -262,7 +227,7 @@ public class AddMediaActivity extends AppCompatActivity {
                 String videoId = videoObject.getJSONObject("id").getString("videoId");
                 String thumbUrl = videoObject.getJSONObject("snippet")
                         .getJSONObject("thumbnails")
-                        .getJSONObject("default")
+                        .getJSONObject("high")
                         .getString("url");
 
                 videoResultsList.add(new VideoResult(videoId, videoTitle, thumbUrl));
@@ -274,7 +239,6 @@ public class AddMediaActivity extends AppCompatActivity {
         @Override
         protected ArrayList<VideoResult> doInBackground(String... params) {
 
-            // If there's no zip code, there's nothing to look up.  Verify size of params.
             if (params.length == 0) {
                 return null;
             }

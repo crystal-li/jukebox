@@ -1,6 +1,9 @@
 package com.uwo.crystalli.jukebox;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,7 +11,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -43,57 +49,67 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        if (savedInstanceState == null) {
-            // TODO: change media fragment dynamically depending on the type of media
-            YouTubePlayerSupportFragment youtubePlayerFragment = new YouTubePlayerSupportFragment();
-            //TODO: figure out a better way to store API keys
-            String apiKey = ((GlobalApplicationState) this.getApplication()).getYoutubeApiKey();
-            youtubePlayerFragment.initialize(apiKey, new YouTubePlayer.OnInitializedListener() {
-                @Override
-                public void onInitializationSuccess(YouTubePlayer.Provider provider,
-                                                    YouTubePlayer youTubePlayer, boolean b) {
-                    //TODO: peek first and then cue video
-                    //      and find some way to peek every xx seconds if
-                    //      the queue is empty
-                    mYoutubePlayer = youTubePlayer;
-                    Log.v(LOG_TAG, "Successfuly initialized Youtube player");
+        Boolean isHost = ((GlobalApplicationState) this.getApplication()).isHost();
 
-                    GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
-                    getNextMediaTask.execute();
-                    setPlayerEventListeners();
-                }
-
-                @Override
-                public void onInitializationFailure(YouTubePlayer.Provider provider,
-                                                    YouTubeInitializationResult youTubeInitializationResult) {
-                    //TODO: Figure out what to actually do if it fails...
-                    String toastMessage = "): Failed to initialize Youtube player.";
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            toastMessage, Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-            });
-
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_media, youtubePlayerFragment)
-                    .commit();
+        //TODO: what if it's null? shouldn't be but just in case?
+        if (savedInstanceState == null && isHost) {
+            addYoutubePlayerFragment();
         }
 
         //Set up button onClick events
         ImageButton addMediaBtn = (ImageButton) findViewById(R.id.add_media_btn);
         addMediaBtn.setOnClickListener(this);
 
-        //TODO: enable play/skip based on settings or host/guest state
         ImageButton playBtn = (ImageButton) findViewById(R.id.play_btn);
-        playBtn.setOnClickListener(this);
-        //playBtn.setOnClickListener(this);
+        if (!isHost) playBtn.setVisibility(View.GONE);
+        else if (isHost) playBtn.setOnClickListener(this);
 
         ImageButton skipBtn = (ImageButton) findViewById(R.id.skip_btn);
-        skipBtn.setEnabled(false);
-        //skipBtn.setOnClickListener(this);
+        if (!isHost) skipBtn.setVisibility(View.GONE);
+        else if (isHost) skipBtn.setOnClickListener(this);
 
         ImageButton viewQueueBtn = (ImageButton) findViewById(R.id.view_queue_btn);
         viewQueueBtn.setOnClickListener(this);
+
+        ImageButton refreshBtn = (ImageButton) findViewById(R.id.refresh_btn);
+        if (isHost) refreshBtn.setVisibility(View.GONE);
+        else if (!isHost) refreshBtn.setOnClickListener(this);
+    }
+
+    private void addYoutubePlayerFragment() {
+        // TODO: change media fragment dynamically depending on the type of media
+        YouTubePlayerSupportFragment youtubePlayerFragment = new YouTubePlayerSupportFragment();
+        //TODO: figure out a better way to store API keys
+        String apiKey = ((GlobalApplicationState) this.getApplication()).getYoutubeApiKey();
+        youtubePlayerFragment.initialize(apiKey, new YouTubePlayer.OnInitializedListener() {
+            @Override
+            public void onInitializationSuccess(YouTubePlayer.Provider provider,
+                                                YouTubePlayer youTubePlayer, boolean b) {
+                //TODO: peek first and then cue video
+                //      and find some way to peek every xx seconds if
+                //      the queue is empty
+                mYoutubePlayer = youTubePlayer;
+                Log.v(LOG_TAG, "Successfuly initialized Youtube player");
+
+                GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
+                getNextMediaTask.execute();
+                setPlayerEventListeners();
+            }
+
+            @Override
+            public void onInitializationFailure(YouTubePlayer.Provider provider,
+                                                YouTubeInitializationResult youTubeInitializationResult) {
+                //TODO: Figure out what to actually do if it fails...
+                String toastMessage = "): Failed to initialize Youtube player.";
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        toastMessage, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
+
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_media, youtubePlayerFragment)
+                .commit();
     }
 
     private void setPlayerEventListeners() {
@@ -210,6 +226,26 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 startActivity(queueIntent);
                 break;
 
+            case R.id.refresh_btn:
+                try {
+                    VideoResult video = new GetNextMediaTask()
+                            .executeOnExecutor(AsyncTask.SERIAL_EXECUTOR).get();
+                    if (video != null) {
+                        TextView nowPlayingTxtView = (TextView) findViewById(R.id.now_playing_textview);
+                        nowPlayingTxtView.setText(video.title);
+                        new DownloadImageTask()
+                                .executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, video.thumbUrl);
+                    } else {
+                        String toastMessage = "There's nothing in the queue!";
+                        Toast toast = Toast.makeText(getApplicationContext(),
+                                toastMessage, Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, "Error ", e);
+                }
+                break;
         }
     }
 
@@ -315,21 +351,24 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
         protected void onPostExecute(VideoResult video) {
             Log.v(LOG_TAG, "GetNextMediaTask finished");
+            Boolean isHost = ((GlobalApplicationState) getApplication()).isHost();
 
-            if (video != null) {
-                mYoutubePlayer.cueVideo(video.getId());
-                //Log.v(LOG_TAG, "play()");
-                //mYoutubePlayer.play();
-            } else {
-                String toastMessage = "There's nothing in the queue!";
-                Toast toast = Toast.makeText(getApplicationContext(),
-                        toastMessage, Toast.LENGTH_SHORT);
-                toast.show();
+            if (isHost) {
+                if (video != null) {
+                    mYoutubePlayer.cueVideo(video.getId());
+                    //Log.v(LOG_TAG, "play()");
+                    //mYoutubePlayer.play();
+                } else {
+                    String toastMessage = "There's nothing in the queue!";
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            toastMessage, Toast.LENGTH_SHORT);
+                    toast.show();
+                }
             }
         }
     }
 
-     public class PopMediaTask extends AsyncTask<Void, Void, Void> {
+    public class PopMediaTask extends AsyncTask<Void, Void, Void> {
 
          private final String LOG_TAG = PopMediaTask.class.getSimpleName();
 
@@ -400,16 +439,29 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
          protected void onPostExecute(Void v) {
              Log.v(LOG_TAG, "PopMediaTask finished");
-             /*
-             String toastMessage = "Finished PopMediaTask!";
-             Toast toast = Toast.makeText(getApplicationContext(),
-                     toastMessage, Toast.LENGTH_SHORT);
-             toast.show();
-
-             GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
-             getNextMediaTask.execute();
-             */
          }
      }
 
+    public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+
+        @Override
+        protected Bitmap doInBackground(String... params) {
+            String url = params[0];
+            Bitmap img = null;
+
+            try {
+                InputStream in = new URL(url).openStream();
+                img = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
+                e.printStackTrace();
+            }
+            return img;
+        }
+
+        protected void onPostExecute(Bitmap img) {
+            ImageView albumImgView = (ImageView) findViewById(R.id.album_artwork_img_view);
+            albumImgView.setImageBitmap(img);
+        }
+    }
 }
