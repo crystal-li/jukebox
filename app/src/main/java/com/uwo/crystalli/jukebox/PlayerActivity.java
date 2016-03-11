@@ -118,36 +118,22 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
                 @Override
                 public void onPlaying() {
-                    String toastMessage = "video playing";
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            toastMessage, Toast.LENGTH_SHORT);
-                    toast.show();
                 }
 
                 @Override
                 public void onPaused() {
-                    String toastMessage = "video paused";
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            toastMessage, Toast.LENGTH_SHORT);
-                    toast.show();
                 }
 
                 @Override
                 public void onStopped() {
-                    String toastMessage = "video stopped";
-                    Toast toast = Toast.makeText(getApplicationContext(),
-                            toastMessage, Toast.LENGTH_SHORT);
-                    toast.show();
                 }
 
                 @Override
                 public void onBuffering(boolean b) {
-
                 }
 
                 @Override
                 public void onSeekTo(int i) {
-
                 }
             });
 
@@ -160,9 +146,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
             @Override
             public void onLoaded(String s) {
-                mYoutubePlayer.play();
-                PopMediaTask popMediaTask = new PopMediaTask();
-                popMediaTask.execute();
+                if (!mYoutubePlayer.isPlaying()) mYoutubePlayer.play();
             }
 
             @Override
@@ -179,8 +163,11 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             public void onVideoEnded() {
                 Log.v(LOG_TAG, "video ended");
 
+                PopMediaTask popMediaTask = new PopMediaTask();
+                popMediaTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+
                 GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
-                getNextMediaTask.execute();
+                getNextMediaTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
             }
 
             @Override
@@ -202,10 +189,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 break;
 
             case R.id.play_btn:
-                //TODO: make a service that constantly checks if the queue is no longer empty?
                 // Need some way so that player can start playing a video when the queue was
                 // empty on startup
-                /*
                 if (!mYoutubePlayer.isPlaying()) {
                     GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
                     getNextMediaTask.execute();
@@ -214,7 +199,6 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                             "The video is already playing!",
                             Toast.LENGTH_SHORT);
                 }
-                */
                 break;
 
             case R.id.skip_btn:
@@ -356,13 +340,15 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             if (isHost) {
                 if (video != null) {
                     mYoutubePlayer.cueVideo(video.getId());
-                    //Log.v(LOG_TAG, "play()");
-                    //mYoutubePlayer.play();
+                    Log.v(LOG_TAG, "playing" + video.title);
+                    //I think this makes it autoplay when it's done???
+                    if (!mYoutubePlayer.isPlaying()) mYoutubePlayer.play();
                 } else {
                     String toastMessage = "There's nothing in the queue!";
                     Toast toast = Toast.makeText(getApplicationContext(),
                             toastMessage, Toast.LENGTH_SHORT);
                     toast.show();
+                    mYoutubePlayer.pause();
                 }
             }
         }
@@ -435,10 +421,6 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                  }
              }
              return null;
-         }
-
-         protected void onPostExecute(Void v) {
-             Log.v(LOG_TAG, "PopMediaTask finished");
          }
      }
 
