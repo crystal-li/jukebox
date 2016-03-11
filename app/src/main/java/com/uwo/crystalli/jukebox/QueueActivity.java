@@ -145,15 +145,18 @@ public class QueueActivity extends AppCompatActivity {
                 (ListView) findViewById(R.id.queue_listview);
         searchResultsListView.setAdapter(QueueAdapter);
 
+        populateMediaQueueTask();
+
         }
 
 
-    public void PopulateMediaQueueTask ()
+    public void populateMediaQueueTask ()
     {
         PopulateMediaQueueTask PopulateQueueTask = new PopulateMediaQueueTask();
-        PopulateQueueTask.execute();}
+        PopulateQueueTask.execute();
+    }
 
-        //This sends a POST request to the Jukebox API to Pull item from queue
+    //This sends a POST request to the Jukebox API to Pull item from queue
     // and returns the response code.
     public class PopulateMediaQueueTask extends AsyncTask<Void, Void, ArrayList<VideoResult>> {
 
@@ -162,9 +165,7 @@ public class QueueActivity extends AppCompatActivity {
         private ArrayList<VideoResult> getDataFromJson(String resultJsonString)
                 throws JSONException {
 
-
-            JSONObject resultJson = new JSONObject(resultJsonString);
-            JSONArray videoJsonArray = resultJson.getJSONArray("items");
+            JSONArray videoJsonArray = new JSONArray(resultJsonString);
 
             ArrayList<VideoResult> videoResultArrayList = new ArrayList<VideoResult>();
 
@@ -173,14 +174,12 @@ public class QueueActivity extends AppCompatActivity {
                 // Extract the fields we need from the JSON object and
                 // construct a videoResult object
                 JSONObject videoObject = videoJsonArray.getJSONObject(i);
-                String videoTitle = videoObject.getJSONObject("snippet").getString("title");
-                String videoId = videoObject.getJSONObject("id").getString("videoId");
-                String thumbUrl = videoObject.getJSONObject("snippet")
-                        .getJSONObject("thumbnails")
-                        .getJSONObject("default")
-                        .getString("url");
+                String videoTitle = videoObject.getString("title");
+                String videoId = videoObject.getString("videoId");
+                String thumbUrl = videoObject.getString("extra");
 
-                videoResultArrayList.add(new VideoResult(videoId, videoTitle, thumbUrl));
+                VideoResult videoResult = new VideoResult(videoId, videoTitle, thumbUrl);
+                videoResultArrayList.add(videoResult);
             }
 
             return videoResultArrayList;
@@ -188,11 +187,6 @@ public class QueueActivity extends AppCompatActivity {
 
         @Override
         protected ArrayList<VideoResult> doInBackground(Void... params) {
-        Log.v(LOG_TAG, "working in the back :)");
-            // If there's no zip code, there's nothing to look up.  Verify size of params.
-            if (params.length == 0) {
-                return null;
-            }
 
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
@@ -201,7 +195,6 @@ public class QueueActivity extends AppCompatActivity {
 
             // Will contain the raw JSON response as a string.
             String videoResultsString = null;
-
 
             try {
                 // Construct the URL for the Jukebox query
@@ -216,7 +209,7 @@ public class QueueActivity extends AppCompatActivity {
 
                 // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
+                StringBuffer buffer;
                 if (inputStream == null) {
                     // Nothing to do.
                     return null;
@@ -275,14 +268,12 @@ public class QueueActivity extends AppCompatActivity {
 
             }
 
-
             protected void onPostExecute (ArrayList < VideoResult > videos) {
                 QueueAdapter.clear();
-                if (videos != null)
+                if (videos != null) {
+                    QueueAdapter.addAll(videos);
                     Log.v(LOG_TAG, videos.toString());
-                else Log.v(LOG_TAG, "our result is null ):");
-                QueueAdapter.addAll(videos);
-
+                } else Log.v(LOG_TAG, "our result is null ):");
             }
 
         }}
