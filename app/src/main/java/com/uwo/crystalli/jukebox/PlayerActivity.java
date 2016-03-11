@@ -3,7 +3,6 @@ package com.uwo.crystalli.jukebox;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,9 +10,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,7 +88,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 //      and find some way to peek every xx seconds if
                 //      the queue is empty
                 mYoutubePlayer = youTubePlayer;
-                Log.v(LOG_TAG, "Successfuly initialized Youtube player");
+                Log.v(LOG_TAG, "Successfully initialized Youtube player");
 
                 GetNextMediaTask getNextMediaTask = new GetNextMediaTask();
                 getNextMediaTask.execute();
@@ -110,6 +109,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_media, youtubePlayerFragment)
                 .commit();
+        ((LinearLayout) findViewById(R.id.guest_layout)).setVisibility(View.GONE);
     }
 
     private void setPlayerEventListeners() {
