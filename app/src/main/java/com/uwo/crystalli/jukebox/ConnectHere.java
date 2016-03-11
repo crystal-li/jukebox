@@ -16,8 +16,14 @@ import android.widget.Toast;
 
 public class ConnectHere extends AppCompatActivity implements View.OnClickListener {
 
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_here);
 
@@ -30,11 +36,13 @@ public class ConnectHere extends AppCompatActivity implements View.OnClickListen
         Button GuestBtn = (Button) findViewById(R.id.guest_btn);
         GuestBtn.setOnClickListener(this);
 
-        }
+    }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    public void onClick(View v)
+    {
+        switch (v.getId())
+        {
 
             case R.id.host_btn:
 
