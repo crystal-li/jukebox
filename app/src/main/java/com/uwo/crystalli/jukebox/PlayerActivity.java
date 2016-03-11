@@ -35,9 +35,19 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_connection, menu);
+        Boolean isHost = ((GlobalApplicationState) this.getApplication()).isHost();
+
+        if(isHost) {
+            inflater.inflate(R.menu.menu_connection2, menu);
+        }
+
+        else if (!isHost) {
+            inflater.inflate(R.menu.menu_connection, menu);
+        }
         return true;
     }
+
+
 
     private final String LOG_TAG = PlayerActivity.class.getSimpleName();
     YouTubePlayer mYoutubePlayer;
