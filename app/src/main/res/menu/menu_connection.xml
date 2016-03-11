@@ -9,15 +9,14 @@
         android:id="@+id/guest_icon"
         android:title="@string/guest"
         android:layout_gravity="left"
-        android:orderInCategory="100"
+        android:orderInCategory="50"
         android:icon="@drawable/ic_guest"
-        app:showAsAction="always|withText"
+        app:showAsAction="always"
         />
-        <!--Host ID, should always be in the overflow
-    <item android:id="@+id/host_id"
-        android:title="@string/host_id"
+        <!--Host ID, should always be in the overflow-->
+    <item android:id="@+id/guest_text"
+        android:title="@string/guest_text"
         android:orderInCategory="100"
-        android:icon="@drawable/ic_info"
-        app:showAsAction="collapseActionView"/> -->
+        app:showAsAction="ifRoom"/>
 
 </menu>
