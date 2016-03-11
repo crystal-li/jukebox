@@ -7,10 +7,14 @@
         android:id="@+id/host_icon"
         android:title="@string/host"
         android:layout_gravity="left"
-        android:orderInCategory="100"
+        android:orderInCategory="50"
         android:icon="@drawable/ic_host"
-        app:showAsAction="always|withText"
+        app:showAsAction="always"
         />
+    <item android:id="@+id/host_text"
+        android:title="@string/host_text"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom"/>
 
 
 </menu>
