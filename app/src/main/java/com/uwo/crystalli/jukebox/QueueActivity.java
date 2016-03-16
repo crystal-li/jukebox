@@ -125,7 +125,7 @@ import java.util.List;
 public class QueueActivity extends AppCompatActivity {
 
     private final String LOG_TAG = QueueActivity.class.getSimpleName();
-    private ArrayAdapter<VideoResult> QueueAdapter;
+    private ArrayAdapter<Media> QueueAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,11 +133,11 @@ public class QueueActivity extends AppCompatActivity {
         setContentView(R.layout.activity_queue);
 
         QueueAdapter =
-                new ArrayAdapter<VideoResult>(
+                new ArrayAdapter<Media>(
                         this, // The current context (this activity)
                         R.layout.populate_queue_items, // The name of the layout ID.
                         R.id.queue_list_item_textview, // The ID of the textview to populate.
-                        new ArrayList<VideoResult>());
+                        new ArrayList<Media>());
 
 
         // Get a reference to the ListView, and attach this adapter to it.
@@ -158,27 +158,28 @@ public class QueueActivity extends AppCompatActivity {
 
     //This sends a POST request to the Jukebox API to Pull item from queue
     // and returns the response code.
-    public class PopulateMediaQueueTask extends AsyncTask<Void, Void, ArrayList<VideoResult>> {
+    public class PopulateMediaQueueTask extends AsyncTask<Void, Void, ArrayList<Media>> {
 
         private final String LOG_TAG = PopulateMediaQueueTask.class.getSimpleName();
 
-        private ArrayList<VideoResult> getDataFromJson(String resultJsonString)
+        private ArrayList<Media> getDataFromJson(String resultJsonString)
                 throws JSONException {
 
             JSONArray videoJsonArray = new JSONArray(resultJsonString);
 
-            ArrayList<VideoResult> videoResultArrayList = new ArrayList<VideoResult>();
+            ArrayList<Media> videoResultArrayList = new ArrayList<Media>();
 
             for (int i = 0; i < videoJsonArray.length(); i++) {
 
                 // Extract the fields we need from the JSON object and
                 // construct a videoResult object
                 JSONObject videoObject = videoJsonArray.getJSONObject(i);
+                String dbId = videoObject.getString("dbId");
                 String videoTitle = videoObject.getString("title");
                 String videoId = videoObject.getString("videoId");
                 String thumbUrl = videoObject.getString("extra");
 
-                VideoResult videoResult = new VideoResult(videoId, videoTitle, thumbUrl);
+                Media videoResult = new Media(videoId, videoTitle, thumbUrl, dbId);
                 videoResultArrayList.add(videoResult);
             }
 
@@ -186,7 +187,7 @@ public class QueueActivity extends AppCompatActivity {
         }
 
         @Override
-        protected ArrayList<VideoResult> doInBackground(Void... params) {
+        protected ArrayList<Media> doInBackground(Void... params) {
 
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
@@ -268,7 +269,7 @@ public class QueueActivity extends AppCompatActivity {
 
             }
 
-            protected void onPostExecute (ArrayList < VideoResult > videos) {
+            protected void onPostExecute (ArrayList < Media > videos) {
                 QueueAdapter.clear();
                 if (videos != null) {
                     QueueAdapter.addAll(videos);

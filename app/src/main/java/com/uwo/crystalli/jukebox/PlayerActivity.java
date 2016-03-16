@@ -222,7 +222,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
             case R.id.refresh_btn:
                 try {
-                    VideoResult video = new GetNextMediaTask()
+                    Media video = new GetNextMediaTask()
                             .executeOnExecutor(AsyncTask.SERIAL_EXECUTOR).get();
                     if (video != null) {
                         TextView nowPlayingTxtView = (TextView) findViewById(R.id.now_playing_textview);
@@ -244,11 +244,11 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     //TODO: move all of the async tasks into a separate file
-    public class GetNextMediaTask extends AsyncTask<Void, Void, VideoResult> {
+    public class GetNextMediaTask extends AsyncTask<Void, Void, Media> {
 
         private final String LOG_TAG = GetNextMediaTask.class.getSimpleName();
 
-        private VideoResult getDataFromJson(String resultJsonString)
+        private Media getDataFromJson(String resultJsonString)
                 throws JSONException {
 
             //TODO: change all the json param names to variables like below
@@ -259,17 +259,18 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             JSONObject videoObject = new JSONObject(resultJsonString);
 
             // Extract the fields we need from the JSON object and
-            // construct a videoResult object
+            // construct a Media object
+            String dbId = videoObject.getString("_id");
             String videoTitle = videoObject.getString("title");
             String videoId = videoObject.getString("videoId");
             //TODO: This should change depending on the media "type"
             String thumbUrl = videoObject.getString("extra");
 
-            return (new VideoResult(videoId, videoTitle, thumbUrl));
+            return (new Media(videoId, videoTitle, thumbUrl, dbId));
         }
 
         @Override
-        protected VideoResult doInBackground(Void... params) {
+        protected Media doInBackground(Void... params) {
 
             Log.v(LOG_TAG, "GetNextMediaTask started");
 
@@ -343,13 +344,13 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             return null;
         }
 
-        protected void onPostExecute(VideoResult video) {
+        protected void onPostExecute(Media video) {
             Log.v(LOG_TAG, "GetNextMediaTask finished");
             Boolean isHost = ((GlobalApplicationState) getApplication()).isHost();
 
             if (isHost) {
                 if (video != null) {
-                    mYoutubePlayer.cueVideo(video.getId());
+                    mYoutubePlayer.cueVideo(video.getVideoId());
                     Log.v(LOG_TAG, "playing" + video.title);
                     //I think this makes it autoplay when it's done???
                     if (!mYoutubePlayer.isPlaying()) mYoutubePlayer.play();

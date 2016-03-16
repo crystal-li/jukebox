@@ -1,25 +1,27 @@
 package com.uwo.crystalli.jukebox;
 
-public class VideoResult {
+public class Media {
 
-    public String id;
+    public String videoId; //Youtube API's VideoID
     public String title;
     public String thumbUrl; //All seem to be 120 x 90 for the default
+    public String dbId; //Jukebox API's unique ID
 
     //TODO: don't know what this is
-    public VideoResult() {
+    public Media() {
         super();
     }
 
-    public VideoResult(String id, String title, String thumbUrl) {
+    public Media(String videoId, String title, String thumbUrl, String dbId) {
         super();
-        this.id = id;
+        this.videoId = videoId;
         this.title = title;
         this.thumbUrl = thumbUrl;
+        this.dbId = dbId;
     }
 
-    public String getId() {
-        return this.id;
+    public String getVideoId() {
+        return this.videoId;
     }
 
     @Override
