@@ -47,16 +47,16 @@ public class QueueActivity extends AppCompatActivity {
 
         }
 
-
     public void populateMediaQueueTask ()
     {
         PopulateMediaQueueTask PopulateQueueTask = new PopulateMediaQueueTask();
-        PopulateQueueTask.execute();
+        Integer hostId = ((GlobalApplicationState) getApplication()).getHostId();
+        PopulateQueueTask.execute(hostId);
     }
 
-    //This sends a POST request to the Jukebox API to Pull item from queue
-    // and returns the response code.
-    public class PopulateMediaQueueTask extends AsyncTask<Void, Void, ArrayList<Media>> {
+    //This sends a POST request to the Jukebox API to get all items from queue
+    // for this hostId and returns the response code.
+    public class PopulateMediaQueueTask extends AsyncTask<Integer, Void, ArrayList<Media>> {
 
         private final String LOG_TAG = PopulateMediaQueueTask.class.getSimpleName();
 
@@ -72,11 +72,12 @@ public class QueueActivity extends AppCompatActivity {
                 // Extract the fields we need from the JSON object and
                 // construct a videoResult object
                 JSONObject videoObject = videoJsonArray.getJSONObject(i);
-                String dbId = videoObject.getString("dbId");
+                String dbId = videoObject.getString("_id");
                 String videoTitle = videoObject.getString("title");
                 String videoId = videoObject.getString("videoId");
                 String thumbUrl = videoObject.getString("extra");
 
+                //TODO: add dbId
                 Media videoResult = new Media(videoId, videoTitle, thumbUrl, dbId);
                 videoResultArrayList.add(videoResult);
             }
@@ -85,7 +86,9 @@ public class QueueActivity extends AppCompatActivity {
         }
 
         @Override
-        protected ArrayList<Media> doInBackground(Void... params) {
+        protected ArrayList<Media> doInBackground(Integer... params) {
+
+            Integer hostId = params[0];
 
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
@@ -97,11 +100,10 @@ public class QueueActivity extends AppCompatActivity {
 
             try {
                 // Construct the URL for the Jukebox query
-                final String JUKEBOX_URL = "http://jukebox1234.herokuapp.com/media/";
+                final String JUKEBOX_URL = "http://jukebox1234.herokuapp.com/media/host/";
 
-                URL url = new URL(JUKEBOX_URL);
+                URL url = new URL(JUKEBOX_URL + Integer.toString(hostId));
 
-                // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -167,13 +169,14 @@ public class QueueActivity extends AppCompatActivity {
 
             }
 
-            protected void onPostExecute (ArrayList < Media > videos) {
+        protected void onPostExecute (ArrayList < Media > videos) {
                 QueueAdapter.clear();
                 if (videos != null) {
                     QueueAdapter.addAll(videos);
                     Log.v(LOG_TAG, videos.toString());
                 } else Log.v(LOG_TAG, "our result is null ):");
             }
+        }
+}
 
-        }}
 

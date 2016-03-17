@@ -31,12 +31,10 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
-// Youtube API Key: AIzaSyDJpskdkcvZ_6coBGE0hzznNr4sjbQGNno
-
 public class AddMediaActivity extends AppCompatActivity {
 
     private final String LOG_TAG = AddMediaActivity.class.getSimpleName();
-    private ArrayAdapter<VideoResult> mSearchResultsAdapter;
+    private ArrayAdapter<Media> mSearchResultsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +59,11 @@ public class AddMediaActivity extends AppCompatActivity {
         });
 
         mSearchResultsAdapter =
-                new ArrayAdapter<VideoResult>(
+                new ArrayAdapter<Media>(
                         this, // The current context (this activity)
                         R.layout.list_item_search_result, // The name of the layout ID.
                         R.id.list_item_search_result_textview, // The ID of the textview to populate.
-                        new ArrayList<VideoResult>());
+                        new ArrayList<Media>());
 
         // Get a reference to the ListView, and attach this adapter to it.
         final ListView searchResultsListView =
@@ -74,7 +72,7 @@ public class AddMediaActivity extends AppCompatActivity {
         searchResultsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                VideoResult video = ((VideoResult) searchResultsListView.getItemAtPosition(i));
+                Media video = ((Media) searchResultsListView.getItemAtPosition(i));
                 addMediaToJukebox(video);
             }
         });
@@ -85,7 +83,7 @@ public class AddMediaActivity extends AppCompatActivity {
         searchYoutubeTask.execute(query);
     }
 
-    private void addMediaToJukebox(VideoResult video) {
+    private void addMediaToJukebox(Media video) {
         addMediaToJukeboxTask addMediaTask = new addMediaToJukeboxTask();
         addMediaTask.execute(video);
     }
@@ -93,21 +91,22 @@ public class AddMediaActivity extends AppCompatActivity {
     //TODO: Is there a better way to abstract out HTTP requests? Put it in a class?
             //This sends a POST request to the Jukebox API to add media from Youtube
             // and returns the response code.
-    public class addMediaToJukeboxTask extends AsyncTask<VideoResult, Void, Integer> {
+    public class addMediaToJukeboxTask extends AsyncTask<Media, Void, Integer> {
 
         private final String LOG_TAG = addMediaToJukeboxTask.class.getSimpleName();
 
         @Override
-        protected Integer doInBackground(VideoResult... v) {
+        protected Integer doInBackground(Media... v) {
 
-            VideoResult video = v[0]; //TODO: This is stupid.
+            Media video = v[0]; //TODO: This is stupid.
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
             //HTTP request parameters
             String title = video.title;
-            String videoId = video.getId();
+            String videoId = video.getVideoId();
+            Integer hostId = ((GlobalApplicationState) getApplication()).getHostId();
             String type = "youtube";
             String extra = video.thumbUrl;
 
@@ -119,6 +118,7 @@ public class AddMediaActivity extends AppCompatActivity {
                 final String TYPE_PARAM = "type";
                 final String VIDEO_ID_PARAM = "videoId";
                 final String EXTRA_PARAM = "extra";
+                final String HOST_ID_PARAM = "hostId";
 
                 URL url = new URL(JUKEBOX_BASE_URL);
 
@@ -134,6 +134,7 @@ public class AddMediaActivity extends AppCompatActivity {
                 params.add(new AbstractMap.SimpleEntry(TYPE_PARAM, type));
                 params.add(new AbstractMap.SimpleEntry(VIDEO_ID_PARAM, videoId));
                 params.add(new AbstractMap.SimpleEntry(EXTRA_PARAM, extra));
+                params.add(new AbstractMap.SimpleEntry(HOST_ID_PARAM, hostId));
 
                 urlConnection.connect();
 
@@ -201,11 +202,11 @@ public class AddMediaActivity extends AppCompatActivity {
         }
     }
 
-    public class SearchYoutubeTask extends AsyncTask<String, Void, ArrayList<VideoResult>> {
+    public class SearchYoutubeTask extends AsyncTask<String, Void, ArrayList<Media>> {
 
         private final String LOG_TAG = SearchYoutubeTask.class.getSimpleName();
 
-        private ArrayList<VideoResult> getDataFromJson(String resultJsonString)
+        private ArrayList<Media> getDataFromJson(String resultJsonString)
                 throws JSONException {
 
             //TODO: change all the json param names to variables like below
@@ -216,7 +217,7 @@ public class AddMediaActivity extends AppCompatActivity {
             JSONObject resultJson = new JSONObject(resultJsonString);
             JSONArray videoJsonArray = resultJson.getJSONArray("items");
 
-            ArrayList<VideoResult> videoResultsList = new ArrayList<VideoResult>();
+            ArrayList<Media> videoResultsList = new ArrayList<Media>();
 
             for(int i = 0; i < videoJsonArray.length(); i++) {
 
@@ -230,14 +231,15 @@ public class AddMediaActivity extends AppCompatActivity {
                         .getJSONObject("high")
                         .getString("url");
 
-                videoResultsList.add(new VideoResult(videoId, videoTitle, thumbUrl));
+                //TODO: Here we don't need a dbID
+                videoResultsList.add(new Media(videoId, videoTitle, thumbUrl, "n/a"));
             }
 
             return videoResultsList;
         }
 
         @Override
-        protected ArrayList<VideoResult> doInBackground(String... params) {
+        protected ArrayList<Media> doInBackground(String... params) {
 
             if (params.length == 0) {
                 return null;
@@ -335,7 +337,7 @@ public class AddMediaActivity extends AppCompatActivity {
             return null;
         }
 
-        protected void onPostExecute(ArrayList<VideoResult> videos) {
+        protected void onPostExecute(ArrayList<Media> videos) {
             mSearchResultsAdapter.clear();
             if (videos != null) {
                 Log.v(LOG_TAG, videos.toString());

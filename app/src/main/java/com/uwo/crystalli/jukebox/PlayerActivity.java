@@ -282,11 +282,12 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
             try {
                 //TODO: Save this somewhere else.
-                final String get_next_req_string = "http://jukebox1234.herokuapp.com/media/next";
+                final String get_next_req_string = "http://jukebox1234.herokuapp.com/media/next/";
 
-                URL url = new URL(get_next_req_string);
+                Integer hostId = ((GlobalApplicationState) getApplication()).getHostId();
 
-                // Create the request to OpenWeatherMap, and open the connection
+                URL url = new URL(get_next_req_string + Integer.toString(hostId));
+
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();

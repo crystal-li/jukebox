@@ -45,14 +45,14 @@
         android:layout_above="@id/host_btn"
         android:layout_centerHorizontal="true" />
 
-   <!-- <EditText android:id="@+id/Enter_Host_ID"
+   <EditText android:id="@+id/host_id_edit_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/Enter_Host_ID"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
         android:layout_above="@id/host_btn"/>
-
+    <!--
     <EditText android:id="@+id/Enter_Your_Name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
